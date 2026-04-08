@@ -1,0 +1,42 @@
+# Default Configuration for Advanced Multi-Agent System
+
+llm:
+  default_model: "gpt-4"
+  temperature: 0.7
+  max_tokens: 4096
+  
+agents:
+  planner:
+    max_consecutive_auto_reply: 10
+    human_input_mode: "NEVER"
+  
+  coder:
+    max_consecutive_auto_reply: 15
+    code_execution:
+      use_docker: true
+      work_dir: "/workspace/tmp"
+  
+  reviewer:
+    linter_tools: ["ruff", "mypy"]
+    
+  tester:
+    framework: "pytest"
+    coverage_threshold: 0.8
+
+orchestration:
+  max_rounds: 10
+  termination_keywords: ["TERMINATE", "COMPLETE", "DONE"]
+
+security:
+  sandbox:
+    enabled: true
+    network_disabled: true
+    read_only_paths: ["/etc", "/usr"]
+  
+  compliance:
+    check_licenses: true
+    check_vulnerabilities: true
+
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
