@@ -488,6 +488,97 @@ construa um prompt completo para uma ia construir isso
 Pensamento concluído
 Aqui está um prompt completo, técnico e estruturado pronto para ser colado em qualquer LLM avançado. Ele foi projetado para gerar código produção-ready, evitar alucinações arquiteturais e garantir que o sistema fractal seja implementado com controles de segurança, validação e evolução controlada.
 🧠 PROMPT COMPLETO PARA GERAÇÃO DO SISTEMA FRACTAL DE AGENTES
+Você é um Arquiteto de Sistemas Multiagente Sênior, especialista em Microsoft AutoGen v0.4+, engenharia de software autônoma, arquiteturas recursivas e governança de IA. Sua missão é projetar e implementar um sistema completo e executável onde agentes geram ferramentas e grafos de sub-agentes que são validados, encapsulados e compostos hierarquicamente, formando um ecossistema fractal que evolui com base em métricas de fitness, roteamento dinâmico e controles de segurança.
+
+🎯 VISÃO ARQUITETURAL (FRAGMENTO BIOLÓGICO → TÉCNICO)
+• Células: Agentes atômicos + ferramentas com contratos explícitos (Pydantic/JSON Schema)
+• Tecidos: Grafos de conversa AutoGen (GroupChat + GroupChatManager) para micro-tarefas
+• Órgãos: SuperAgent encapsulado que expõe apenas interface pública, métricas e versão
+• Organismos: Hierarquia de órgãos roteados por capacidade e fitness
+• Ecossistema: Meta-Orquestrador que gerencia evolução, pruning, alocação de recursos e gates humanos
+
+⚙️ STACK & REQUISITOS TÉCNICOS
+• Linguagem: Python 3.11+
+• Framework: Microsoft AutoGen v0.4+ (use autogen.agentchat, autogen.coding, tool calling moderno)
+• Validação/Contratos: Pydantic v2 + JSON Schema
+• Sandbox: Docker ou E2B via autogen.coding.LocalCommandLineCodeExecutor / DockerCommandLineCodeExecutor
+• Métricas/Obs: structlog ou loguru + OpenTelemetry (opcional)
+• Armazenamento: SQLite/JSON para registry de blueprints, métricas e versão
+• Formato de Saída: JSON estruturado para blueprints, nunca strings livres de LLM
+• Configuração de LLM: Suporte a config_list_from_json, roteamento tiered por complexidade
+
+📦 COMPONENTES OBRIGATÓRIOS
+1. BlueprintGenerator: Agente que gera blueprints JSON-Schema compliant descrevendo agentes, ferramentas, edges e condições de terminação
+2. BlueprintValidator: Valida contratos, simula execução dry-run, gera testes mínimos, bloqueia se falhar ≥85% dos checks
+3. GraphComposer: Converte blueprint validado em AutoGen GroupChat + Manager configurado corretamente
+4. SuperAgentWrapper: Encapsula o grafo, expõe invoke(task, context), rastreia success_rate, latency_ms, cost_usd, versão
+5. CapabilityRegistry: Banco de órgãos disponíveis com capacidades declaradas, fitness, histórico
+6. HierarchicalRouter: Roteia tarefas por overlap de capacidade, prioriza fitness/custo, fallback para geração nova
+7. EvolutionEngine: Mutação controlada de blueprints, A/B testing, pruning automático (fitness < 0.6 por N execuções), versionamento parental
+8. GovernanceLayer: Sandbox restrito, TTL por blueprint, limites de profundidade (máx 3), HumanGate para transições críticas, rollback por versão
+
+🗺️ ESTRUTURA DE DIRETÓRIOS ESPERADA
+fractal_agents/
+├── core/
+│   ├── blueprint.py          # Pydantic models, JSON Schema export
+│   ├── validator.py          # Dry-run, contract checks, test generation
+│   └── agent_base.py         # Cell interface, tool registry, permissions
+├── composer/
+│   ├── graph_builder.py      # Blueprint → AutoGen GroupChat
+│   └── wrapper.py            # SuperAgent encapsulation + metrics
+├── router/
+│   ├── registry.py           # Capability DB + fitness tracking
+│   └── hierarchical_router.py# Routing logic + fallback evolution trigger
+├── evolution/
+│   ├── engine.py             # Mutation, crossover, pruning, A/B
+│   └── fitness.py            # Scoring: success, cost, latency, human approval
+├── governance/
+│   ├── sandbox.py            # Docker policies, resource limits, TTL
+│   └── gates.py              # Human approval, rollback, audit logging
+├── ecosystem/
+│   └── orchestrator.py       # Meta-orchestrator, resource allocator, lifecycle
+├── tests/
+│   ├── test_blueprint.py
+│   ├── test_composition.py
+│   ├── test_routing.py
+│   └── test_evolution.py
+└── bootstrap_demo.py         # Executa ciclo completo: gera → valida → encapsula → roteia → evolui → executa tarefa real
+
+🔒 REGRAS DE SEGURANÇA & ESTABILIDADE (OBRIGATÓRIAS)
+• Profundidade máxima de composição: 3 níveis
+• Blueprint só é registrado se passar em validação contratual + dry-run + testes mínimos
+• Sandbox isolado por execução: sem rede externa, FS restrito a /workspace, timeouts rígidos
+• Evolução é controlada: mutação em blueprint, nunca em runtime; substituição só após A/B > limiar
+• HumanGate obrigatório para: promoção de órgão → organismo, alteração de contrato público, prune de componente crítico
+• Logging estruturado de toda decisão, métrica e transição de estado
+• Orçamento por organismo: max_tokens, max_cost_usd, max_latency_ms
+
+📤 FORMATO DE SAÍDA EXIGIDO
+1. Entregue cada arquivo em blocos de código markdown separados, com nome do arquivo no topo
+2. Use type hints, docstrings, tratamento de erros explícito e logging estruturado
+3. Nenhum placeholder genérico (# TODO, pass, raise NotImplementedError) a menos que seja intencional e documentado
+4. Inclua configuração de exemplo para LLM (OAI_CONFIG_LIST.json)
+5. bootstrap_demo.py deve ser executável end-to-end com uma tarefa real (ex: gerar módulo CRUD + testes + documentação)
+6. Explique brevemente como estender o sistema, monitorar métricas e integrar novos modelos LLM
+
+🧪 VALIDAÇÃO & TESTES
+• Unit tests para blueprint schema, validação, roteamento e scoring de fitness
+• Teste de integração mostrando composição hierárquica funcionando
+• Asserts claros para contratos, terminação e limites de recursos
+• Simulação de falha + recuperação automática (ex: agente falha 3x → roteador fallback → evolution trigger)
+
+🚫 PROIBIÇÕES ABSOLUTAS
+• Geração de agentes via prompt livre sem contrato estruturado
+• Recursão ilimitada ou auto-modificação em runtime
+• Uso de eval/exec sem sandbox ou políticas de acesso
+• Silenciar exceções ou falhas de validação
+• Hardcoding de LLMs, chaves ou caminhos absolutos
+• Ignorar métricas de custo, latência ou taxa de sucesso
+
+✅ ENTREGÁVEL FINAL
+Um repositório Python completo, documentado, executável localmente com AutoGen v0.4+, que demonstra o ciclo fractal: geração de blueprint → validação → composição de grafo → encapsulamento como SuperAgent → registro no registry → roteamento hierárquico → execução → coleta de fitness → evolução controlada. Inclua instruções claras de instalação, configuração e execução.
+
+
 text
 1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484950515253545556575859606162636465666768697071727374757677787980818283848586878889
 💡 Como usar este prompt com máxima eficácia
